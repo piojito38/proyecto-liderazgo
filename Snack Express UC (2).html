@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snack Express UC</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F6FAF3; --surface:#FFFFFF; --ink:#1B2B24; --muted:#5B6B63; --line:#DDE8DB;
+  --forest:#1F4D3A; --berry:#C8325A; --berry-ink:#FFFFFF; --leaf:#DDEBC4; --leaf-ink:#2C4A12;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101A15; --surface:#18251E; --ink:#EAF2EC; --muted:#9DB0A4; --line:#27382F;
+    --forest:#8FD1A9; --berry:#F0698F; --berry-ink:#2A0A14; --leaf:#2B3D1D; --leaf-ink:#CFE8A6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101A15; --surface:#18251E; --ink:#EAF2EC; --muted:#9DB0A4; --line:#27382F;
+  --forest:#8FD1A9; --berry:#F0698F; --berry-ink:#2A0A14; --leaf:#2B3D1D; --leaf-ink:#CFE8A6;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;padding-bottom:96px}
+.wrap{max-width:560px;margin:0 auto;padding:0 18px}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;margin:0;line-height:1.1}
+header{padding:28px 0 12px}
+h1{font-size:38px;font-weight:800;color:var(--forest);letter-spacing:-.02em}
+.lead{margin:10px 0 0;color:var(--muted);max-width:44ch}
+h2{font-size:22px;font-weight:700;margin:28px 0 4px}
+.note{color:var(--muted);font-size:14px;margin:0 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--forest);color:var(--bg);border-color:var(--forest);font-weight:700}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.size{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 6px;font:inherit;cursor:pointer}
+.size[aria-pressed="true"]{border-color:var(--forest);box-shadow:0 0 0 2px var(--forest)}
+.cup{background:var(--leaf);clip-path:polygon(0 0,100% 0,86% 100%,14% 100%)}
+.size b{font-size:15px}.size span{font-size:13px;color:var(--muted)}
+.frow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.fst{display:inline-flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:999px}
+.fst button{width:36px;height:36px;border:0;background:none;color:var(--ink);font-size:20px;cursor:pointer;border-radius:999px;font-family:inherit}
+.fst output{min-width:84px;text-align:center;font-weight:700;font-size:14px}
+.chip:disabled{opacity:1;cursor:default}
+.price-line{display:flex;justify-content:space-between;align-items:center;background:var(--leaf);color:var(--leaf-ink);border-radius:14px;padding:12px 14px;margin-top:18px}
+.price-line b{font-size:20px}
+.btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;padding:14px;border-radius:14px;border:0;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.primary{background:var(--berry);color:var(--berry-ink)}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.ghost{background:transparent;color:var(--forest);border:2px solid var(--forest);margin-top:10px}
+.msg{font-size:14px;color:var(--forest);min-height:20px;margin:8px 0 0}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.summary h3{font-size:17px;margin-bottom:8px}
+.cupitem{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.cupitem:first-of-type{border-top:0}
+.cupitem small{grid-column:1;color:var(--muted);font-size:13px}
+.cupitem button{grid-row:1/3;grid-column:2;align-self:center;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.tot{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:18px}
+.empty{color:var(--muted);font-size:15px;margin:0}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--berry);outline-offset:2px}
+form{display:grid;gap:14px;margin-top:14px}
+label{display:grid;gap:6px;font-weight:500;font-size:15px}
+input[type=text],input[type=time],input:not([type]){font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:46px}
+.pay{display:flex;gap:10px}
+.pay label{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
+.pay input{accent-color:var(--berry)}
+.err{color:var(--berry);font-size:14px;min-height:20px;margin:0}
+pre{white-space:pre-wrap;background:var(--leaf);color:var(--leaf-ink);border-radius:12px;padding:12px;font:14px/1.5 "DM Sans",sans-serif;margin:10px 0 0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--forest);color:var(--bg);padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:5}
+.bar b{font-size:18px}
+.bar a{background:var(--berry);color:var(--berry-ink);text-decoration:none;font-weight:700;border-radius:999px;padding:10px 18px}
+footer{color:var(--muted);font-size:13px;margin-top:26px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <h1>Snack Express UC</h1>
+  <p class="lead">Arma tu vaso de yogur saludable con frutas y toppings. Te lo llevamos a tu aula en tu break.</p>
+</header>
+
+<section aria-labelledby="t1">
+  <h2 id="t1">1. Elige el tamaño</h2>
+  <div class="sizes" id="sizes"></div>
+</section>
+<section aria-labelledby="t2">
+  <h2 id="t2">2. Elige el sabor del yogur</h2>
+  <p class="note" id="nf"></p>
+  <div class="chips" id="flavors"></div>
+</section>
+<section aria-labelledby="t3">
+  <h2 id="t3">3. Elige tus frutas</h2>
+  <p class="note">Elige la cantidad: S/ 1 por cada 40 g de fruta.</p>
+  <div id="fruits"></div>
+</section>
+<section aria-labelledby="t4">
+  <h2 id="t4">4. Elige tus toppings</h2>
+  <p class="note" id="nt"></p>
+  <div class="chips" id="tops"></div>
+  <div class="price-line"><span id="desc">Tu vaso</span><b id="price">S/ 5</b></div>
+  <button class="btn primary" id="add" type="button" style="margin-top:12px">Agregar a mi pedido</button>
+  <p class="msg" id="msg" role="status"></p>
+</section>
+
+<section aria-labelledby="t5" id="pedido">
+  <h2 id="t5">Tu pedido</h2>
+  <div class="summary" id="summary"></div>
+  <form id="f" novalidate>
+    <label>Tu nombre<input id="nombre" autocomplete="name" placeholder="Ej. María"></label>
+    <label>Aula o pabellón<input id="aula" placeholder="Ej. Pabellón A, aula 204"></label>
+    <label>Hora de tu break<input id="hora" type="time"></label>
+    <fieldset style="border:0;padding:0;margin:0">
+      <legend style="font-weight:500;font-size:15px;margin-bottom:6px">Método de pago</legend>
+      <div class="pay">
+        <label><input type="radio" name="pago" value="Yape" checked>Yape</label>
+        <label><input type="radio" name="pago" value="Efectivo">Efectivo</label>
+      </div>
+    </fieldset>
+    <p class="err" id="err" role="alert"></p>
+    <a class="btn primary" id="wa" href="#" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+  </form>
+  <button class="btn ghost" id="copy" type="button">Copiar resumen del pedido</button>
+  <pre id="out" hidden></pre>
+  <footer>Pide hasta 30 minutos antes de tu break. Pago con Yape o efectivo al recibir. Entrega a cargo del equipo emprendedor. Precios de ejemplo del prototipo.</footer>
+</section>
+</main>
+
+<div class="bar">
+  <span><b id="barTot">S/ 0</b> <span id="barCnt" style="font-size:14px;opacity:.85"></span></span>
+  <a href="#pedido">Ver mi pedido</a>
+</div>
+
+<script>
+var WA_NUMBER = "51943468567";
+var SIZES = [{n:"Pequeño",oz:8,p:5,w:30,h:38},{n:"Mediano",oz:12,p:7,w:38,h:48},{n:"Grande",oz:16,p:9,w:46,h:58}];
+var FLAVORS = ["Fresa","Lúcuma","Durazno","Guanábana","Mango","Arándano","Piña","Natural","Vainilla","Griego"];
+var FRUITS = ["Fresa","Plátano","Manzana","Uva","Papaya","Piña","Arándano","Kiwi","Mango","Lúcuma"];
+var TOPS = ["Granola","Chispas de chocolate negro","Gomitas de fruta","Coco rallado","Semillas de chía"];
+var MAXF = [1,2,3], MAXT = [1,3,5], G = 40, MAXU = 5;
+var cur = {size:1, flavors:[], fruits:{}, tops:[]};
+var cart = [];
+var $ = function(id){return document.getElementById(id)};
+
+function units(c){ var n=0; for(var k in c.fruits) n+=c.fruits[k]; return n; }
+function price(c){ return SIZES[c.size].p + units(c); }
+var note = "";
+function pickFlavor(v){
+  var a = cur.flavors, i = a.indexOf(v), m = MAXF[cur.size];
+  if(i>=0){ a.splice(i,1); return; }
+  if(m===1){ a.length = 0; a.push(v); return; }
+  if(a.length>=m){ note = "Con este tamaño puedes elegir hasta "+m+" sabores."; return; }
+  a.push(v);
+}
+function pickTop(v){
+  var a = cur.tops, i = a.indexOf(v), m = MAXT[cur.size];
+  if(cur.size===2) return;
+  if(i>=0){ a.splice(i,1); return; }
+  if(m===1){ a.length = 0; a.push(v); return; }
+  if(a.length>=m){ note = "Con este tamaño puedes elegir hasta "+m+" toppings."; return; }
+  a.push(v);
+}
+function setSize(i){
+  cur.size = i;
+  cur.flavors = cur.flavors.slice(0,MAXF[i]);
+  cur.tops = i===2 ? TOPS.slice() : cur.tops.slice(0,MAXT[i]);
+}
+function fruitsText(c){ var a=[]; FRUITS.forEach(function(f){ if(c.fruits[f]) a.push(f+" "+(c.fruits[f]*G)+" g"); }); return a.join(", "); }
+
+function build(){
+  var s = $("sizes"); s.textContent = "";
+  SIZES.forEach(function(z,i){
+    var b = document.createElement("button"); b.type="button"; b.className="size"; b.setAttribute("aria-pressed","false");
+    b.innerHTML = '<div class="cup"></div><b></b><span></span>';
+    var cup = b.querySelector(".cup"); cup.style.width = z.w+"px"; cup.style.height = z.h+"px";
+    b.querySelector("b").textContent = z.n;
+    b.querySelector("span").textContent = z.oz+" oz · S/ "+z.p;
+    b.onclick = function(){ note = ""; setSize(i); paint(); };
+    s.appendChild(b);
+  });
+  chips("flavors", FLAVORS, pickFlavor);
+  chips("tops", TOPS, pickTop);
+  var fb = $("fruits"); fb.textContent = "";
+  FRUITS.forEach(function(v){
+    var r = document.createElement("div"); r.className = "frow";
+    r.innerHTML = "<span></span><div class='fst'><button type='button' aria-label='Menos'>−</button><output></output><button type='button' aria-label='Más'>+</button></div>";
+    r.children[0].textContent = v;
+    var b = r.querySelectorAll("button");
+    b[0].onclick = function(){ cur.fruits[v] = Math.max(0,(cur.fruits[v]||0)-1); paint(); };
+    b[1].onclick = function(){ cur.fruits[v] = Math.min(MAXU,(cur.fruits[v]||0)+1); paint(); };
+    fb.appendChild(r);
+  });
+}
+function chips(id, arr, fn){
+  var box = $(id); box.textContent = "";
+  arr.forEach(function(v){
+    var b = document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=v; b.setAttribute("aria-pressed","false");
+    b.onclick = function(){ note = ""; fn(v); paint(); };
+    box.appendChild(b);
+  });
+}
+function paint(){
+  document.querySelectorAll("#sizes .size").forEach(function(b,i){ b.setAttribute("aria-pressed", i===cur.size); });
+  var m = MAXF[cur.size], mt = MAXT[cur.size];
+  document.querySelectorAll("#flavors .chip").forEach(function(b,i){ b.setAttribute("aria-pressed", cur.flavors.indexOf(FLAVORS[i])>=0); });
+  document.querySelectorAll("#tops .chip").forEach(function(b,i){ b.setAttribute("aria-pressed", cur.tops.indexOf(TOPS[i])>=0); b.disabled = cur.size===2; });
+  document.querySelectorAll("#fruits .frow").forEach(function(r,i){ var u = cur.fruits[FRUITS[i]]||0; r.querySelector("output").textContent = u ? (u*G)+" g · S/ "+u : "0 g"; });
+  $("nf").textContent = m===1 ? "Elige 1 sabor." : "Elige hasta "+m+" sabores.";
+  $("nt").textContent = cur.size===2 ? "Con el vaso grande van todos los toppings incluidos." : "Elige hasta "+mt+(mt===1?" topping":" toppings")+", incluidos en el precio.";
+  $("price").textContent = "S/ " + price(cur);
+  $("desc").textContent = SIZES[cur.size].n + " · " + (cur.flavors.length ? cur.flavors.join(" + ") : "elige un sabor");
+  var ok = cur.flavors.length && units(cur);
+  $("add").disabled = !ok;
+  if(note){ $("msg").textContent = note; note = ""; }
+  else if(!ok) $("msg").textContent = !cur.flavors.length ? "Elige un sabor para continuar." : "Elige al menos una fruta.";
+  else $("msg").textContent = "";
+}
+function describe(c){
+  return SIZES[c.size].n + " (" + SIZES[c.size].oz + " oz) · Yogur " + c.flavors.join(" + ") + " · Frutas: " + fruitsText(c) + " · Toppings: " + (c.tops.length ? c.tops.join(", ") : "ninguno");
+}
+$("add").onclick = function(){
+  if(!(cur.flavors.length && units(cur))) return;
+  cart.push({size:cur.size, flavors:cur.flavors.slice(), fruits:JSON.parse(JSON.stringify(cur.fruits)), tops:cur.tops.slice(), p:price(cur)});
+  cur.flavors = []; cur.fruits = {}; cur.tops = cur.size===2 ? TOPS.slice() : [];
+  paint(); update();
+  $("msg").textContent = "Vaso agregado. Arma otro o ve a tu pedido.";
+};
+function total(){ return cart.reduce(function(s,c){return s+c.p},0); }
+function update(){
+  var s = $("summary"); s.textContent = "";
+  if(!cart.length){
+    var p = document.createElement("p"); p.className="empty"; p.textContent="Aún no agregaste ningún vaso. Arma el tuyo arriba."; s.appendChild(p);
+  } else {
+    var h = document.createElement("h3"); h.textContent="Resumen"; s.appendChild(h);
+    cart.forEach(function(c,i){
+      var d = document.createElement("div"); d.className="cupitem";
+      d.innerHTML = "<span></span><small></small><button type='button'>Quitar</button>";
+      d.children[0].textContent = (i+1)+". Vaso "+SIZES[c.size].n.toLowerCase()+" · S/ "+c.p;
+      d.children[1].textContent = "Yogur "+c.flavors.join(" + ")+" · "+fruitsText(c)+(c.tops.length?" · "+c.tops.join(", "):"");
+      d.children[2].onclick = function(){ cart.splice(i,1); update(); };
+      s.appendChild(d);
+    });
+    var t = document.createElement("div"); t.className="tot"; t.innerHTML="<span>Total</span><span></span>"; t.children[1].textContent="S/ "+total(); s.appendChild(t);
+  }
+  $("barTot").textContent = "S/ " + total();
+  $("barCnt").textContent = cart.length ? "· " + cart.length + (cart.length===1?" vaso":" vasos") : "";
+  $("wa").href = waLink();
+}
+function message(){
+  var pago = document.querySelector('input[name="pago"]:checked').value;
+  var t = "Hola, quiero hacer un pedido en Snack Express UC:\n";
+  cart.forEach(function(c,i){ t += (i+1) + ". " + describe(c) + " · S/ " + c.p + "\n"; });
+  t += "Total: S/ " + total() + "\nNombre: " + $("nombre").value.trim() + "\nAula o pabellón: " + $("aula").value.trim() + "\nHora de break: " + $("hora").value + "\nPago: " + pago;
+  return t;
+}
+function waLink(){ return "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(message()); }
+function problem(){
+  if(!cart.length) return "Agrega al menos un vaso a tu pedido.";
+  if(!$("nombre").value.trim()) return "Escribe tu nombre.";
+  if(!$("aula").value.trim()) return "Indica tu aula o pabellón.";
+  if(!$("hora").value) return "Indica la hora de tu break.";
+  return "";
+}
+$("wa").onclick = function(e){
+  var m = problem(); $("err").textContent = m;
+  if(m){ e.preventDefault(); return; }
+  this.href = waLink();
+};
+$("copy").onclick = function(){
+  var m = problem(); $("err").textContent = m; if(m) return;
+  var txt = message(); var o = $("out"); o.hidden = false; o.textContent = txt;
+  try{ navigator.clipboard.writeText(txt).then(function(){ $("copy").textContent="Resumen copiado"; }, function(){ $("copy").textContent="Copia el texto de abajo"; }); }
+  catch(e){ $("copy").textContent="Copia el texto de abajo"; }
+};
+["nombre","aula","hora"].forEach(function(id){ $(id).addEventListener("input", update); });
+document.querySelectorAll('input[name="pago"]').forEach(function(r){ r.addEventListener("change", update); });
+build(); paint(); update();
+</script>
+</body>
+</html>
